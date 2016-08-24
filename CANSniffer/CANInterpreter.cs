@@ -7,6 +7,8 @@ namespace CANSniffer
 	public class CANInterpreter
 	{
 		BluetoothSerialPort port;
+		readonly ushort[] crc_16_table = {  0x0000, 0xCC01, 0xD801, 0x1400, 0xF001, 0x3C00, 0x2800, 0xE401,
+									     	0xA001, 0x6C00, 0x7800, 0xB401, 0x5000, 0x9C01, 0x8801, 0x4400 };
 
 		public CANInterpreter()
 		{
@@ -75,40 +77,42 @@ namespace CANSniffer
 							{
 								if (byteList.Count >= msglen + 2)
 								{
-									ushort crc = readUShort(byteList, 2 + msglen - 2);//headerlen + msglen - crclen
-									switch (byteList[3])
+									if (getCRC(byteList.GetRange(2, byteList[2] - 2).ToArray()) == readUShort(byteList, 2 + msglen - 2))//headerlen + msglen - crclen
 									{
-										case 0x00:
-											//received CAN message
-											if (CANMessageReceived != null)
-											{
-												ushort canID = readUShort(byteList, 4);
-												CANMessageReceived(this, new CANMessageReceivedEventArgs(canID, byteList.GetRange(5, msglen - 5).ToArray()));
-											}
-											break;
-										case 0x01:
-											//get/set bitmask
-											if (CANMaskSettingReceived != null)
-											{
-												ushort setting = readUShort(byteList, 5);
-												CANMaskSettingReceived(this, new CANSettingReceivedEventArgs(byteList[4], setting));
-											}
-											break;
-										case 0x02:
-											//get/set filter
-											if (byteList.Count >= msglen + 2)
-											{
-												if (CANFilterSettingReceived != null)
+										switch (byteList[3])
+										{
+											case 0x00:
+												//received CAN message
+												if (CANMessageReceived != null)
+												{
+													ushort canID = readUShort(byteList, 4);
+													CANMessageReceived(this, new CANMessageReceivedEventArgs(canID, byteList.GetRange(6, msglen - 6).ToArray()));
+												}
+												break;
+											case 0x01:
+												//get/set bitmask
+												if (CANMaskSettingReceived != null)
 												{
 													ushort setting = readUShort(byteList, 5);
-													CANFilterSettingReceived(this, new CANSettingReceivedEventArgs(byteList[4], setting));
+													CANMaskSettingReceived(this, new CANSettingReceivedEventArgs(byteList[4], setting));
 												}
-												byteList.RemoveRange(0, msglen + 2);
-											}
-											break;
-										default:
-											//unknown type
-											break;
+												break;
+											case 0x02:
+												//get/set filter
+												if (byteList.Count >= msglen + 2)
+												{
+													if (CANFilterSettingReceived != null)
+													{
+														ushort setting = readUShort(byteList, 5);
+														CANFilterSettingReceived(this, new CANSettingReceivedEventArgs(byteList[4], setting));
+													}
+													byteList.RemoveRange(0, msglen + 2);
+												}
+												break;
+											default:
+												//unknown type
+												break;
+										}
 									}
 									byteList.RemoveRange(0, msglen + 2);
 								}
@@ -137,6 +141,22 @@ namespace CANSniffer
 			}
 			catch { }
 			return result;
+		}
+
+		private ushort getCRC(byte[] bytes)
+		{
+			ushort crc = 0x0000;
+			for (int i = 0; i < bytes.Length; i++)
+			{
+				ushort r = crc_16_table[crc & 0x000F];
+				crc = (ushort)((crc >> 4) & 0x0FFF);
+				crc = (ushort)(crc ^ r ^ crc_16_table[bytes[i] & 0x0F]);
+				/* now compute checksum of upper four bits of ucData */
+				r = crc_16_table[crc & 0x000F];
+				crc = (ushort)((crc >> 4) & 0x0FFF);
+				crc = (ushort)(crc ^ r ^ crc_16_table[(bytes[i] >> 4) & 0x0F]);
+			}
+			return crc;
 		}
 	}
 
