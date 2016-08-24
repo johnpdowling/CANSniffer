@@ -39,85 +39,90 @@ namespace CANSniffer
 				List<byte> byteList = new List<byte>();
 				while (port.IsConnected)
 				{
-					int bytesread = await port.ReadAsync(readbytes, 0, len);
-					if (bytesread > 0)
+					try
 					{
-						for (int i = 0; i < bytesread; i++)
+						int bytesread = await port.ReadAsync(readbytes, 0, len);
+						if (bytesread > 0)
 						{
-							byteList.Add(readbytes[i]);
-						}
-					}
-					//forward to header
-					while (byteList.Count > 0)
-					{
-						if (byteList[0] == (byte)'V')
-						{
-							break;
-						}
-						byteList.RemoveAt(0);
-					}
-					if (byteList.Count > 1)
-					{
-						if (byteList[1] != (byte)'W')
-						{
-							//if header's not right, move off V and the message is trashed
-							byteList.RemoveAt(0);
-							continue;
-						}
-					}
-
-					if (byteList.Count > 3)
-					{
-						byte msglen = byteList[2];
-						if (msglen <= 16)
-						{
-							if (byteList.Count >= msglen + 2)
+							for (int i = 0; i < bytesread; i++)
 							{
-								ushort crc = readUShort(byteList, 2 + msglen - 2);//headerlen + msglen - crclen
-								switch (byteList[3])
+								byteList.Add(readbytes[i]);
+							}
+						}
+						//forward to header
+						while (byteList.Count > 0)
+						{
+							if (byteList[0] == (byte)'V')
+							{
+								break;
+							}
+							byteList.RemoveAt(0);
+						}
+						if (byteList.Count > 1)
+						{
+							if (byteList[1] != (byte)'W')
+							{
+								//if header's not right, move off V and the message is trashed
+								byteList.RemoveAt(0);
+								continue;
+							}
+						}
+
+						if (byteList.Count > 3)
+						{
+							byte msglen = byteList[2];
+							if (msglen <= 16)
+							{
+								if (byteList.Count >= msglen + 2)
 								{
-									case 0x00:
-										//received CAN message
-										if (CANMessageReceived != null)
-										{
-											ushort canID = readUShort(byteList, 4);
-											CANMessageReceived(this, new CANMessageReceivedEventArgs(canID, byteList.GetRange(6, msglen - 6).ToArray()));
-										}
-										break;
-									case 0x01:
-										//get/set bitmask
-										if (CANMaskSettingReceived != null)
-										{
-											ushort setting = readUShort(byteList, 5);
-											CANMaskSettingReceived(this, new CANSettingReceivedEventArgs(byteList[4], setting));
-										}
-										break;
-									case 0x02:
-										//get/set filter
-										if (byteList.Count >= msglen + 2)
-										{
-											if (CANFilterSettingReceived != null)
+									ushort crc = readUShort(byteList, 2 + msglen - 2);//headerlen + msglen - crclen
+									switch (byteList[3])
+									{
+										case 0x00:
+											//received CAN message
+											if (CANMessageReceived != null)
+											{
+												ushort canID = readUShort(byteList, 4);
+												CANMessageReceived(this, new CANMessageReceivedEventArgs(canID, byteList.GetRange(5, msglen - 5).ToArray()));
+											}
+											break;
+										case 0x01:
+											//get/set bitmask
+											if (CANMaskSettingReceived != null)
 											{
 												ushort setting = readUShort(byteList, 5);
-												CANFilterSettingReceived(this, new CANSettingReceivedEventArgs(byteList[4], setting));
+												CANMaskSettingReceived(this, new CANSettingReceivedEventArgs(byteList[4], setting));
 											}
-											byteList.RemoveRange(0, msglen + 2);
-										}
-										break;
-									default:
-										//unknown type
-										break;
+											break;
+										case 0x02:
+											//get/set filter
+											if (byteList.Count >= msglen + 2)
+											{
+												if (CANFilterSettingReceived != null)
+												{
+													ushort setting = readUShort(byteList, 5);
+													CANFilterSettingReceived(this, new CANSettingReceivedEventArgs(byteList[4], setting));
+												}
+												byteList.RemoveRange(0, msglen + 2);
+											}
+											break;
+										default:
+											//unknown type
+											break;
+									}
+									byteList.RemoveRange(0, msglen + 2);
 								}
-								byteList.RemoveRange(0, msglen + 2);
-							}
 
-						}
-						else
-						{
-							//bad message length, move off V and trash the message
-							byteList.RemoveAt(0);
+							}
+							else
+							{
+								//bad message length, move off V and trash the message
+								byteList.RemoveAt(0);
+							}
 						}
 					}
+					catch(Exception ex)
+					{ }
 				}
 			}
 		}
