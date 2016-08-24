@@ -5,6 +5,7 @@ using Android.Bluetooth;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Android.Content;
 
 namespace CANSniffer
 {
@@ -14,13 +15,14 @@ namespace CANSniffer
 		BluetoothSerialPort port;
 		CANInterpreter interpreter = new CANInterpreter();
 
+		bool sniffing = false;
+
 		List<string> messages = new List<string>();
 
 		protected override void OnCreate(Bundle savedInstanceState)
 		{
 			base.OnCreate(savedInstanceState);
 
-			// Set our view from the "main" layout resource
 			SetContentView(Resource.Layout.Main);
 
 			ListView myview = FindViewById<ListView>(Resource.Id.pingListView);
@@ -28,10 +30,9 @@ namespace CANSniffer
 
 			interpreter.CANMessageReceived += CANMessageReceived;
 
-			// Get our button from the layout resource,
-			// and attach an event to it
+			LoadPreferences();
 
-			Button button = FindViewById<Button>(Resource.Id.myButton);
+			Button button = FindViewById<Button>(Resource.Id.prefsButton);
 
 			button.Click += delegate 
 			{
@@ -42,26 +43,18 @@ namespace CANSniffer
 					descriptions.Add(device.Name + " - " + device.Address);
 				}
 
-				alert.SetTitle("Please choose a SPP device:");
+				alert.SetTitle("Choose SPP device:");
 				alert.SetItems(descriptions.ToArray(),
 				async (sender, e) =>
 				{
 					string deviceDescription = descriptions[e.Which];
 					string[] descripSplit = deviceDescription.Split(" - ".ToCharArray());
 					string mac = descripSplit[descripSplit.Length - 1];
-					byte[] macbytes = macStringToBytes(mac);
-					if (macbytes != null)
+					if (mac != null)
 					{
-						if (port != null)
-						{
-							port.BluetoothConnectionReceived -= BluetoothConnectionReceived;
-							port = null;
-						}
-						port = new BluetoothSerialPort(macbytes);
-						port.BluetoothConnectionReceived += BluetoothConnectionReceived;
-						Task connectTask = port.ConnectAsync();
-						button.Text = deviceDescription;
-						await connectTask;
+						Task serialTask = StartSerial(mac);
+						SavePreferences();
+						await serialTask;
 					}
 				});
 
@@ -73,53 +66,93 @@ namespace CANSniffer
 				Dialog dialog = alert.Create();
 				dialog.Show();
 			};
+
+			button = FindViewById<Button>(Resource.Id.startstopButton);
+			button.Click += StartStopButton_Click;
+
 		}
 
 		private void BluetoothConnectionReceived(object sender, BluetoothConnectionReceivedEventArgs args)
 		{
 			if (args.Connected)
 			{
+				RunOnUiThread(() =>
+				{
+					TextView deviceview = FindViewById<TextView>(Resource.Id.deviceNameTextView);
+					deviceview.Text = args.Name;
+					TextView connectview = FindViewById<TextView>(Resource.Id.connectionTextView);
+					connectview.Text = (args.Connected ? "Connected" : "Not Connected");
+
+				});
 				interpreter.Port = port;
-				Task foo = interpreter.InterpretStream();
+				Task.Run(() => interpreter.InterpretStream());
 			}
 		}
 
 		private void CANMessageReceived(object sender, CANMessageReceivedEventArgs args)
 		{
-			string message = "ID: " + args.CANID.ToString("X3");
-			message += " Message:";
-			for (byte i = 0; i < args.Message.Length; i++)
+			if (sniffing)
 			{
-				message += " 0x" + args.Message[i].ToString("X2");
+				string message = "ID: " + args.CANID.ToString("X3");
+				message += " Message:";
+				for (byte i = 0; i < args.Message.Length; i++)
+				{
+					message += " 0x" + args.Message[i].ToString("X2");
+				}
+				RunOnUiThread(() =>
+				{
+					ListView myview = FindViewById<ListView>(Resource.Id.pingListView);
+					(myview.Adapter as ArrayAdapter).Add(message);
+				});
 			}
-			RunOnUiThread(() =>
-			{
-				ListView myview = FindViewById<ListView>(Resource.Id.pingListView);
-				(myview.Adapter as ArrayAdapter).Add(message);
-			});
 		}
 
-		private byte[] macStringToBytes(string mac)
+		private async Task StartSerial(string mac)
 		{
-			if (mac == null) return null;
-			string[] macs = mac.Split(":".ToCharArray());
-			if (macs.Length != 6)
+			if (port != null)
 			{
-				return null;
+				port.BluetoothConnectionReceived -= BluetoothConnectionReceived;
+				port = null;
 			}
-			byte[] bytes = new byte[6];
-			for (int i = 0; i < 6; i++)
+			port = new BluetoothSerialPort(mac);
+			port.BluetoothConnectionReceived += BluetoothConnectionReceived;
+			Task connectTask = port.ConnectAsync();
+			RunOnUiThread(() =>
 			{
-				try
-				{
-					bytes[i] = System.Convert.ToByte(macs[i], 16);
-				}
-				catch
-				{
-					return null;
-				}
+				TextView deviceview = FindViewById<TextView>(Resource.Id.deviceNameTextView);
+				deviceview.Text = port.Name;
+				TextView connectview = FindViewById<TextView>(Resource.Id.connectionTextView);
+				connectview.Text = "Connecting...";
+
+			});
+			await connectTask;
+		}
+
+		private void SavePreferences()
+		{
+			var prefs = Application.Context.GetSharedPreferences("CANSniffer", FileCreationMode.Private);
+			var prefEditor = prefs.Edit();
+			prefEditor.PutString("DeviceMAC", port.Address);
+			prefEditor.Commit();
+		}
+
+		private void LoadPreferences()
+		{
+			//retreive 
+			var prefs = Application.Context.GetSharedPreferences("CANSniffer", FileCreationMode.Private);
+			var macPref = prefs.GetString("DeviceMAC", null);
+
+			if (macPref != null)
+			{
+				Task.Run(() => StartSerial(macPref));
 			}
-			return bytes;
+		}
+
+		void StartStopButton_Click(object sender, System.EventArgs e)
+		{
+			sniffing = !sniffing;
+			Button button = FindViewById<Button>(Resource.Id.startstopButton);
+			button.Text = GetString(sniffing ? Resource.String.stop : Resource.String.start);
 		}
 	}
 }

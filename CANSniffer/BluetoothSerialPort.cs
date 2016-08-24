@@ -27,6 +27,17 @@ namespace CANSniffer
 		{
 			device = BluetoothAdapter.DefaultAdapter.GetRemoteDevice(macbytes);
 			socket = device.CreateRfcommSocketToServiceRecord(serialPortUUID);
+			istream = socket.InputStream;
+			ostream = socket.OutputStream;
+		}
+
+		public BluetoothSerialPort(string mac) : this()
+		{
+			
+			device = BluetoothAdapter.DefaultAdapter.GetRemoteDevice(macStringToBytes(mac));
+			socket = device.CreateRfcommSocketToServiceRecord(serialPortUUID);
+			istream = socket.InputStream;
+			ostream = socket.OutputStream;
 		}
 
 		static public ICollection<BluetoothDevice> BondedSerialDevices
@@ -64,6 +75,32 @@ namespace CANSniffer
 			}*/
 		}
 
+		public string Address
+		{
+			get
+			{
+				if (device != null)
+				{
+					return device.Address;
+				}
+				return null;
+			}
+		}
+
+		public string Name
+		{
+			get
+			{
+				if (device != null)
+				{
+					return device.Name;
+				}
+				return null;
+			}
+		}
+
+		public event EventHandler<BluetoothConnectionReceivedEventArgs> BluetoothConnectionReceived;
+
 		public void Connect()
 		{
 			if (socket != null)
@@ -71,27 +108,19 @@ namespace CANSniffer
 				try
 				{
 					socket.Connect();
-
-					if (IsConnected)
-					{
-						istream = socket.InputStream;
-						ostream = socket.OutputStream;
-					}
 					//raise event
-					SynchronizationContext.Current.Post((e) =>
+					if (BluetoothConnectionReceived != null)
 					{
-						if (BluetoothConnectionReceived != null)
-							BluetoothConnectionReceived(this, new BluetoothConnectionReceivedEventArgs(device.Address, device.Name, IsConnected));
-					}, null);
+						BluetoothConnectionReceived(this, new BluetoothConnectionReceivedEventArgs(device.Address, device.Name, IsConnected));
+					}
 				}
 				catch (Exception ex)
 				{
 					//raise event
-					SynchronizationContext.Current.Post((e) =>
+					if (BluetoothConnectionReceived != null)
 					{
-						if (BluetoothConnectionReceived != null)
-							BluetoothConnectionReceived(this, new BluetoothConnectionReceivedEventArgs(device.Address, device.Name, IsConnected, ex));
-					}, null);
+						BluetoothConnectionReceived(this, new BluetoothConnectionReceivedEventArgs(device.Address, device.Name, IsConnected, ex));
+					}
 				}
 			}
 		}
@@ -103,39 +132,70 @@ namespace CANSniffer
 				try
 				{
 					await socket.ConnectAsync();
-					if (IsConnected)
-					{
-						istream = socket.InputStream;
-						ostream = socket.OutputStream;
-					}
 					//raise event
-					//SynchronizationContext.Current.Post((e) =>
+					if (BluetoothConnectionReceived != null)
 					{
-						if (BluetoothConnectionReceived != null)
-							BluetoothConnectionReceived(this, new BluetoothConnectionReceivedEventArgs(device.Address, device.Name, IsConnected));
-					}//, null);
+						BluetoothConnectionReceived(this, new BluetoothConnectionReceivedEventArgs(device.Address, device.Name, IsConnected));
+					}
 				}
 				catch (Exception ex)
 				{
 					//raise event
-					//SynchronizationContext.Current.Post((e) =>
+					if (BluetoothConnectionReceived != null)
 					{
-						if (BluetoothConnectionReceived != null)
-							BluetoothConnectionReceived(this, new BluetoothConnectionReceivedEventArgs(device.Address, device.Name, IsConnected, ex));
-					}//, null);
+						BluetoothConnectionReceived(this, new BluetoothConnectionReceivedEventArgs(device.Address, device.Name, IsConnected, ex));
+					}
 				}
 			});
 		}
 
-		public event EventHandler<BluetoothConnectionReceivedEventArgs> BluetoothConnectionReceived;
-
 		public int Read(byte[] buffer, int offset, int count)
+		{
+			return (IsConnected ? istream.Read(buffer, offset, count) : -1);
+		}
+
+		public async Task<int> ReadAsync(byte[] buffer, int offset, int count)
+		{
+			return (IsConnected ? await istream.ReadAsync(buffer, offset, count) : -1);
+		}
+
+		public void Write(byte[] buffer, int offset, int count)
 		{
 			if (IsConnected)
 			{
-				return istream.Read(buffer, offset, count);
+				ostream.Write(buffer, offset, count);
 			}
-			return 0;
+		}
+
+		public async Task WriteAync(byte[] buffer, int offset, int count)
+		{
+			if (IsConnected)
+			{
+				await ostream.WriteAsync(buffer, offset, count);
+			}
+		}
+
+		private byte[] macStringToBytes(string mac)
+		{
+			if (mac == null) return null;
+			string[] macs = mac.Split(":".ToCharArray());
+			if (macs.Length != 6)
+			{
+				return null;
+			}
+			byte[] bytes = new byte[6];
+			for (int i = 0; i < 6; i++)
+			{
+				try
+				{
+					bytes[i] = System.Convert.ToByte(macs[i], 16);
+				}
+				catch
+				{
+					return null;
+				}
+			}
+			return bytes;
 		}
 	}
 

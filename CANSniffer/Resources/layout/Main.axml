@@ -5,11 +5,159 @@
     android:layout_height="match_parent"
     android:minWidth="25px"
     android:minHeight="25px">
-    <Button
-        android:id="@+id/myButton"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="48.0dp"
-        android:text="@string/hello" />
+        android:layout_height="wrap_content"
+        android:id="@+id/linearLayout3">
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/linearLayout1">
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="521.0dp"
+                android:layout_height="match_parent"
+                android:id="@+id/linearLayout2">
+                <TextView
+                    android:text="No Device"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_width="270.0dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/deviceNameTextView"
+                    android:layout_marginRight="0.0dp" />
+                <TextView
+                    android:text="No Connection"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/connectionTextView" />
+            </LinearLayout>
+            <Button
+                android:text="Prefs"
+                android:id="@+id/prefsButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="0.0dp"
+                android:minWidth="60dp"
+                android:maxWidth="60dp" />
+        </LinearLayout>
+        <LinearLayout
+            android:orientation="vertical"
+            android:minWidth="25px"
+            android:minHeight="25px"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/linearLayout4">
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/linearLayout5">
+                <TextView
+                    android:text="Masks"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:id="@+id/textView1"
+                    android:gravity="center" />
+                <EditText
+                    android:inputType="numberDecimal"
+                    android:layout_width="45.0dp"
+                    android:layout_height="match_parent"
+                    android:id="@+id/mask1EditText"
+                    android:layout_marginLeft="4.0dp"
+                    android:layout_marginRight="4.0dp"
+                    android:text="FFF"
+                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
+                    android:digits="0123456789abcdef"
+                    android:maxLength="3" />
+                <EditText
+                    android:inputType="number"
+                    android:layout_width="45.0dp"
+                    android:layout_height="match_parent"
+                    android:id="@+id/mask2EditText"
+                    android:layout_marginLeft="4.0dp"
+                    android:layout_marginRight="4.0dp"
+                    android:text="FFF"
+                    android:textAppearance="@android:style/TextAppearance.Material.Caption" />
+                <TextView
+                    android:text="Filters"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:id="@+id/textView2"
+                    android:gravity="center" />
+                <EditText
+                    android:inputType="number"
+                    android:layout_width="45.0dp"
+                    android:layout_height="match_parent"
+                    android:id="@+id/filter1EditText"
+                    android:layout_marginLeft="4.0dp"
+                    android:layout_marginRight="4.0dp"
+                    android:text="FFF"
+                    android:textAppearance="@android:style/TextAppearance.Material.Caption" />
+                <EditText
+                    android:inputType="number"
+                    android:layout_width="45.0dp"
+                    android:layout_height="match_parent"
+                    android:id="@+id/filter2EditText"
+                    android:layout_marginLeft="4.0dp"
+                    android:layout_marginRight="4.0dp"
+                    android:text="FFF"
+                    android:textAppearance="@android:style/TextAppearance.Material.Caption" />
+                <EditText
+                    android:inputType="number"
+                    android:layout_width="45.0dp"
+                    android:layout_height="match_parent"
+                    android:id="@+id/filter3EditText"
+                    android:layout_marginLeft="4.0dp"
+                    android:layout_marginRight="4.0dp"
+                    android:text="FFF"
+                    android:textAppearance="@android:style/TextAppearance.Material.Caption" />
+                <EditText
+                    android:inputType="number"
+                    android:layout_width="45.0dp"
+                    android:layout_height="match_parent"
+                    android:id="@+id/filter4EditText"
+                    android:layout_marginLeft="4.0dp"
+                    android:layout_marginRight="4.0dp"
+                    android:text="FFF"
+                    android:textAppearance="@android:style/TextAppearance.Material.Caption" />
+                <EditText
+                    android:inputType="number"
+                    android:layout_width="45.0dp"
+                    android:layout_height="match_parent"
+                    android:id="@+id/filter5EditText"
+                    android:layout_marginLeft="4.0dp"
+                    android:layout_marginRight="4.0dp"
+                    android:text="FFF"
+                    android:textAppearance="@android:style/TextAppearance.Material.Caption" />
+                <EditText
+                    android:inputType="number"
+                    android:layout_width="45.0dp"
+                    android:layout_height="match_parent"
+                    android:id="@+id/filter6EditText"
+                    android:layout_marginLeft="4.0dp"
+                    android:layout_marginRight="4.0dp"
+                    android:text="FFF"
+                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
+                    android:maxLength="3" />
+                <Button
+                    android:text="Reset"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:id="@+id/resetMaskFilterButton" />
+            </LinearLayout>
+        </LinearLayout>
+        <Button
+            android:id="@+id/startstopButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/start"
+            android:layout_marginBottom="0.0dp" />
+    </LinearLayout>
     <ListView
         android:minWidth="25px"
         android:minHeight="25px"
@@ -18,5 +166,7 @@
         android:id="@+id/pingListView"
         android:transcriptMode="alwaysScroll"
         android:stackFromBottom="true"
-        android:fastScrollEnabled="true" />
+        android:fastScrollEnabled="true"
+        android:layout_marginTop="0.0dp"
+        android:layout_marginBottom="0.0dp" />
 </LinearLayout>
