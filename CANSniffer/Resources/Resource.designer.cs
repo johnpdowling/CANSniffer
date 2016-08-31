@@ -68,6 +68,9 @@ namespace CANSniffer
 			// aapt resource value: 0x7f060011
 			public const int filter6EditText = 2131099665;
 			
+			// aapt resource value: 0x7f060013
+			public const int keyboardview = 2131099667;
+			
 			// aapt resource value: 0x7f060001
 			public const int linearLayout1 = 2131099649;
 			
@@ -89,11 +92,11 @@ namespace CANSniffer
 			// aapt resource value: 0x7f06000a
 			public const int mask2EditText = 2131099658;
 			
-			// aapt resource value: 0x7f060015
-			public const int myButton = 2131099669;
+			// aapt resource value: 0x7f060016
+			public const int myButton = 2131099670;
 			
-			// aapt resource value: 0x7f060014
-			public const int pingListView = 2131099668;
+			// aapt resource value: 0x7f060015
+			public const int pingListView = 2131099669;
 			
 			// aapt resource value: 0x7f060005
 			public const int prefsButton = 2131099653;
@@ -101,8 +104,8 @@ namespace CANSniffer
 			// aapt resource value: 0x7f060012
 			public const int resetMaskFilterButton = 2131099666;
 			
-			// aapt resource value: 0x7f060013
-			public const int startstopButton = 2131099667;
+			// aapt resource value: 0x7f060014
+			public const int startstopButton = 2131099668;
 			
 			// aapt resource value: 0x7f060008
 			public const int textView1 = 2131099656;
@@ -185,6 +188,9 @@ namespace CANSniffer
 			
 			// aapt resource value: 0x7f040000
 			public const int hexkeyboard = 2130968576;
+			
+			// aapt resource value: 0x7f040001
+			public const int slideup = 2130968577;
 			
 			static Xml()
 			{

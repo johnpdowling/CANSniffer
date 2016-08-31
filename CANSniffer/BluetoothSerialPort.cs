@@ -17,8 +17,6 @@ namespace CANSniffer
 
 		static Java.Util.UUID serialPortUUID = Java.Util.UUID.FromString("00001101-0000-1000-8000-00805f9b34fb");
 
-
-
 		BluetoothSerialPort()
 		{
 		}
@@ -26,18 +24,27 @@ namespace CANSniffer
 		public BluetoothSerialPort(byte[] macbytes) : this()
 		{
 			device = BluetoothAdapter.DefaultAdapter.GetRemoteDevice(macbytes);
-			socket = device.CreateRfcommSocketToServiceRecord(serialPortUUID);
-			istream = socket.InputStream;
-			ostream = socket.OutputStream;
+			SetUpSocket();
 		}
 
 		public BluetoothSerialPort(string mac) : this()
 		{
 			
 			device = BluetoothAdapter.DefaultAdapter.GetRemoteDevice(macStringToBytes(mac));
+			SetUpSocket();
+		}
+
+		private void SetUpSocket()
+		{
 			socket = device.CreateRfcommSocketToServiceRecord(serialPortUUID);
 			istream = socket.InputStream;
 			ostream = socket.OutputStream;
+		}
+
+		private void SetUpStreams()
+		{
+			istream.ReadTimeout = 100;
+			ostream.WriteTimeout = 100;
 		}
 
 		static public ICollection<BluetoothDevice> BondedSerialDevices
@@ -52,7 +59,6 @@ namespace CANSniffer
 					{
 						if (uuids[j].Uuid.ToString() == serialPortUUID.ToString())
 						{
-
 							devices.Add(device);
 						}
 					}
@@ -108,6 +114,7 @@ namespace CANSniffer
 				try
 				{
 					socket.Connect();
+					SetUpStreams();
 					//raise event
 					if (BluetoothConnectionReceived != null)
 					{
@@ -132,6 +139,7 @@ namespace CANSniffer
 				try
 				{
 					await socket.ConnectAsync();
+					SetUpStreams();
 					//raise event
 					if (BluetoothConnectionReceived != null)
 					{
@@ -167,7 +175,7 @@ namespace CANSniffer
 			}
 		}
 
-		public async Task WriteAync(byte[] buffer, int offset, int count)
+		public async Task WriteAsync(byte[] buffer, int offset, int count)
 		{
 			if (IsConnected)
 			{

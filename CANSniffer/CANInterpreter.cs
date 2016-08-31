@@ -30,13 +30,54 @@ namespace CANSniffer
 		public event EventHandler<CANSettingReceivedEventArgs> CANMaskSettingReceived;
 		public event EventHandler<CANSettingReceivedEventArgs> CANFilterSettingReceived;
 
+		public async Task SendHeartbeat()
+		{
+			if (port != null)
+			{
+				while (port.IsConnected)
+				{
+					await port.WriteAsync(new byte[] { (byte)'V', (byte)'W', 0x04, 0x03, 0xc1, 0x42 }, 0, 6);
+					await Task.Delay(1000);
+				}
+			}
+		}
+
+		public async Task SendNewFilter(byte filterNum, ushort newFilter)
+		{
+			ushort crc = getCRC(new byte[] { 0x07, 0x12, filterNum, (byte)(newFilter >> 8), (byte)(newFilter & 0x00FF) });
+			await port.WriteAsync(new byte[] { (byte)'V', (byte)'W', 0x07, 0x12, filterNum, (byte)(newFilter >> 8), (byte)(newFilter & 0x00FF), (byte)(crc >> 8), (byte)(crc & 0x00FF) }, 0, 9);
+		}
+
+		public async Task SendNewMask(byte maskNum, ushort newMask)
+		{
+			ushort crc = getCRC(new byte[] { 0x07, 0x12, maskNum, (byte)(newMask >> 8), (byte)(newMask & 0x00FF) });
+			await port.WriteAsync(new byte[] { (byte)'V', (byte)'W', 0x07, 0x12, maskNum, (byte)(newMask >> 8), (byte)(newMask & 0x00FF), (byte)(crc >> 8), (byte)(crc & 0x00FF) }, 0, 9);
+		}
+
+		private async Task SendReadFilter(byte filterNum)
+		{
+			ushort crc = getCRC(new byte[] { 0x05, 0x02, filterNum });
+			await port.WriteAsync(new byte[] { (byte)'V', (byte)'W', 0x05, 0x02, filterNum, (byte)(crc >> 8), (byte)(crc & 0x00FF) }, 0, 7);
+		}
+
+		private async Task SendReadMask(byte maskNum)
+		{
+			ushort crc = getCRC(new byte[] { 0x05, 0x01, maskNum });
+			await port.WriteAsync(new byte[] { (byte)'V', (byte)'W', 0x05, 0x01, maskNum, (byte)(crc >> 8), (byte)(crc & 0x00FF) }, 0, 7);
+		}
 
 		public async Task InterpretStream()
 		{
 			if (port != null)
 			{
+				await SendReadMask(0);
+				await SendReadMask(1);
+				for (byte i = 0; i < 6; i++)
+				{
+					await SendReadFilter(i);
+				}
 				byte[] readbytes = new byte[16];
-				int len = 16;
+				int len = 1;//16;
 
 				List<byte> byteList = new List<byte>();
 				while (port.IsConnected)
@@ -106,7 +147,6 @@ namespace CANSniffer
 														ushort setting = readUShort(byteList, 5);
 														CANFilterSettingReceived(this, new CANSettingReceivedEventArgs(byteList[4], setting));
 													}
-													byteList.RemoveRange(0, msglen + 2);
 												}
 												break;
 											default:
@@ -114,6 +154,8 @@ namespace CANSniffer
 												break;
 										}
 									}
+									else 
+									{ }
 									byteList.RemoveRange(0, msglen + 2);
 								}
 
@@ -125,7 +167,7 @@ namespace CANSniffer
 							}
 						}
 					}
-					catch(Exception ex)
+					catch 
 					{ }
 				}
 			}

@@ -6,28 +6,33 @@
 		<Key android:codes="7" android:keyLabel="0" android:keyEdgeFlags="left" />
 		<Key android:codes="8" android:keyLabel="1" />
 		<Key android:codes="9" android:keyLabel="2" />
-		<Key android:codes="10" android:keyLabel="3" android:keyEdgeFlags="right" />
+		<Key android:codes="10" android:keyLabel="3"  />
+		<Key android:codes="67" android:keyLabel="Del" android:isRepeatable="true" android:keyEdgeFlags="right" />
+        
 	</Row>
 
 	<Row>
 		<Key android:codes="11" android:keyLabel="4" android:keyEdgeFlags="left" />
 		<Key android:codes="12" android:keyLabel="5" />
 		<Key android:codes="13" android:keyLabel="6" />
-		<Key android:codes="14" android:keyLabel="7" android:keyEdgeFlags="right" />
+		<Key android:codes="14" android:keyLabel="7" />
+		<Key android:codes="28" android:keyLabel="CLR" android:keyEdgeFlags="right"/>
 	</Row>
 
 	<Row>
-		<Key android:codes="15" android:keyLabel="8" android:keyEdgeFlags="left" />
-		<Key android:codes="16" android:keyLabel="9" />
-		<Key android:codes="29" android:keyLabel="A" />
-		<Key android:codes="30" android:keyLabel="B" android:keyEdgeFlags="right" />
+		<Key android:codes="15" android:keyLabel="8" android:keyWidth="20%p" android:keyEdgeFlags="left" />
+		<Key android:codes="16" android:keyLabel="9" android:keyWidth="20%p" />
+		<Key android:codes="29" android:keyLabel="A" android:keyWidth="20%p" />
+		<Key android:codes="30" android:keyLabel="B" android:keyWidth="20%p" android:keyEdgeFlags="right" />
+
 	</Row>
 
 	<Row>
 		<Key android:codes="31" android:keyLabel="C" android:keyEdgeFlags="left" />
 		<Key android:codes="32" android:keyLabel="D" />
 		<Key android:codes="33" android:keyLabel="E" />
-		<Key android:codes="34" android:keyLabel="F" android:keyEdgeFlags="right" />
+		<Key android:codes="34" android:keyLabel="F" />
+		<Key android:codes="66" android:keyLabel="Set" android:keyEdgeFlags="right" />
 	</Row>
 	<!--
 	<Row>

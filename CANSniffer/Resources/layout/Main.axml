@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:minWidth="25px"
@@ -63,25 +65,25 @@
                     android:id="@+id/textView1"
                     android:gravity="center" />
                 <EditText
-                    android:inputType="numberDecimal"
                     android:layout_width="45.0dp"
                     android:layout_height="match_parent"
                     android:id="@+id/mask1EditText"
                     android:layout_marginLeft="4.0dp"
                     android:layout_marginRight="4.0dp"
-                    android:text="FFF"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
                     android:textAppearance="@android:style/TextAppearance.Material.Caption"
-                    android:digits="0123456789abcdef"
-                    android:maxLength="3" />
+                    android:maxLength="3"
+                    android:text=" " />
                 <EditText
-                    android:inputType="number"
                     android:layout_width="45.0dp"
                     android:layout_height="match_parent"
                     android:id="@+id/mask2EditText"
                     android:layout_marginLeft="4.0dp"
                     android:layout_marginRight="4.0dp"
-                    android:text="FFF"
-                    android:textAppearance="@android:style/TextAppearance.Material.Caption" />
+                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
+                    android:maxLength="3"
+                    android:text=" " />
                 <TextView
                     android:text="Filters"
                     android:textAppearance="?android:attr/textAppearanceMedium"
@@ -90,66 +92,74 @@
                     android:id="@+id/textView2"
                     android:gravity="center" />
                 <EditText
-                    android:inputType="number"
                     android:layout_width="45.0dp"
                     android:layout_height="match_parent"
                     android:id="@+id/filter1EditText"
                     android:layout_marginLeft="4.0dp"
                     android:layout_marginRight="4.0dp"
-                    android:text="FFF"
-                    android:textAppearance="@android:style/TextAppearance.Material.Caption" />
+                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
+                    android:maxLength="3"
+                    android:text=" " />
                 <EditText
-                    android:inputType="number"
                     android:layout_width="45.0dp"
                     android:layout_height="match_parent"
                     android:id="@+id/filter2EditText"
                     android:layout_marginLeft="4.0dp"
                     android:layout_marginRight="4.0dp"
-                    android:text="FFF"
-                    android:textAppearance="@android:style/TextAppearance.Material.Caption" />
+                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
+                    android:maxLength="3"
+                    android:text=" " />
                 <EditText
-                    android:inputType="number"
                     android:layout_width="45.0dp"
                     android:layout_height="match_parent"
                     android:id="@+id/filter3EditText"
                     android:layout_marginLeft="4.0dp"
                     android:layout_marginRight="4.0dp"
-                    android:text="FFF"
-                    android:textAppearance="@android:style/TextAppearance.Material.Caption" />
+                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
+                    android:maxLength="3"
+                    android:text=" " />
                 <EditText
-                    android:inputType="number"
                     android:layout_width="45.0dp"
                     android:layout_height="match_parent"
                     android:id="@+id/filter4EditText"
                     android:layout_marginLeft="4.0dp"
                     android:layout_marginRight="4.0dp"
-                    android:text="FFF"
-                    android:textAppearance="@android:style/TextAppearance.Material.Caption" />
+                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
+                    android:maxLength="3"
+                    android:text=" " />
                 <EditText
-                    android:inputType="number"
                     android:layout_width="45.0dp"
                     android:layout_height="match_parent"
                     android:id="@+id/filter5EditText"
                     android:layout_marginLeft="4.0dp"
                     android:layout_marginRight="4.0dp"
-                    android:text="FFF"
-                    android:textAppearance="@android:style/TextAppearance.Material.Caption" />
+                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
+                    android:maxLength="3"
+                    android:text=" " />
                 <EditText
-                    android:inputType="number"
                     android:layout_width="45.0dp"
                     android:layout_height="match_parent"
                     android:id="@+id/filter6EditText"
                     android:layout_marginLeft="4.0dp"
                     android:layout_marginRight="4.0dp"
-                    android:text="FFF"
                     android:textAppearance="@android:style/TextAppearance.Material.Caption"
-                    android:maxLength="3" />
+                    android:maxLength="3"
+                    android:text=" " />
                 <Button
                     android:text="Reset"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:id="@+id/resetMaskFilterButton" />
             </LinearLayout>
+            <android.inputmethodservice.KeyboardView
+                android:id="@+id/keyboardview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:visibility="gone" />
         </LinearLayout>
         <Button
             android:id="@+id/startstopButton"
@@ -162,7 +172,7 @@
         android:minWidth="25px"
         android:minHeight="25px"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="fill_parent"
         android:id="@+id/pingListView"
         android:transcriptMode="alwaysScroll"
         android:stackFromBottom="true"
