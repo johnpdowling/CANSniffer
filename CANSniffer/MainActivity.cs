@@ -25,6 +25,8 @@ namespace CANSniffer
 		bool sniffing = false;
 
 		List<string> messages = new List<string>();
+		List<string> messageData = new List<string>();
+		string seperator = "::";
 
 		protected override void OnCreate(Bundle savedInstanceState)
 		{
@@ -217,15 +219,24 @@ namespace CANSniffer
 			{
 				string message = "ID: " + args.CANID.ToString("X3");
 				message += " Message:";
+				string dataMessage = (DateTime.Now - sniffStart).TotalMilliseconds.ToString();
+				dataMessage += seperator + "\"" + args.CANID.ToString("X3") + "\"";
 				for (byte i = 0; i < args.Message.Length; i++)
 				{
 					message += " " + args.Message[i].ToString("X2");
+					dataMessage += seperator + "\"" + args.Message[i].ToString("X2") + "\"";
+				}
+				for (byte i = (byte)args.Message.Length; i < 8; i++)
+				{
+					dataMessage += seperator +"\"\"";
 				}
 				message += " ";
 				for (byte i = 0; i < args.Message.Length; i++)
 				{
 					message += (IsDisplayableCharacter((char)args.Message[i]) ? ((char)args.Message[i]).ToString() : ".");
+					dataMessage += seperator + "\"" + (IsDisplayableCharacter((char)args.Message[i]) ? ((char)args.Message[i]).ToString() : ".") + "\"";
 				}
+				messageData.Add(dataMessage);
 				RunOnUiThread(() =>
 				{
 					ListView myview = FindViewById<ListView>(Resource.Id.pingListView);
@@ -373,13 +384,37 @@ namespace CANSniffer
 				{
 					string sdFolderPath = System.IO.Path.Combine("/storage/sdcard1", "CANSnifferLogs");
 					string filename = "Log" + sniffStart.Month.ToString("D2") + "-" + sniffStart.Day.ToString("D2") + "-" + sniffStart.Year.ToString() + "_" +
-											  sniffStart.Hour.ToString("D2") + "," + sniffStart.Minute.ToString("D2") + "," + sniffStart.Second.ToString("D2") + ".txt";
+											  sniffStart.Hour.ToString("D2") + "," + sniffStart.Minute.ToString("D2") + "," + sniffStart.Second.ToString("D2") + ".csv";
 					string filePath = System.IO.Path.Combine(sdFolderPath, filename);
 					if (!System.IO.File.Exists(filePath))
 					{
-						using (System.IO.StreamWriter write = new System.IO.StreamWriter(filePath, true))
+						try
 						{
-							write.Write("Hello world!");
+							using (System.IO.StreamWriter write = new System.IO.StreamWriter(filePath, true))
+							{
+								write.WriteLine("Mask1" + seperator + "Mask2");
+								write.WriteLine(FindViewById<EditText>(Resource.Id.mask1EditText).Text + seperator +
+												 FindViewById<EditText>(Resource.Id.mask2EditText).Text);
+								write.WriteLine("Filter1" + seperator + "Filter2" + seperator + "Filter3" + seperator + "Filter4" + seperator + "Filter5" + seperator + "Filter6");
+								write.WriteLine(FindViewById<EditText>(Resource.Id.filter1EditText).Text + seperator +
+												FindViewById<EditText>(Resource.Id.filter2EditText).Text + seperator +
+										    	FindViewById<EditText>(Resource.Id.filter3EditText).Text + seperator +
+												FindViewById<EditText>(Resource.Id.filter4EditText).Text + seperator +
+										   		FindViewById<EditText>(Resource.Id.filter5EditText).Text + seperator +
+												FindViewById<EditText>(Resource.Id.filter6EditText).Text);
+								write.WriteLine("Time" + seperator + "CANID" + seperator + "BYTE0" + seperator + "BYTE1" + seperator + "BYTE2" + seperator + "BYTE3" + seperator + 
+								                										   "BYTE4" + seperator + "BYTE5" + seperator + "BYTE6" + seperator + "BYTE7" + seperator +
+								               											   "TEXT0" + seperator + "TEXT1" + seperator + "TEXT2" + seperator + "TEXT3" + seperator +
+																						   "TEXT4" + seperator + "TEXT5" + seperator + "TEXT6" + seperator + "TEXT7");
+								foreach (string data in messageData)
+								{
+									write.WriteLine(data);
+								}
+							}
+						}
+						catch
+						{
+							Toast.MakeText(this, "Error Saving Data", ToastLength.Short).Show();
 						}
 					}
 					Toast.MakeText(this, "Session Data Saved", ToastLength.Short).Show();
@@ -394,6 +429,12 @@ namespace CANSniffer
 			}
 			else
 			{
+				messageData.Clear();
+				RunOnUiThread(() =>
+				{
+					ListView myview = FindViewById<ListView>(Resource.Id.pingListView);
+					(myview.Adapter as ArrayAdapter).Clear();
+				});
 				sniffStart = DateTime.Now;
 			}
 			Button button = FindViewById<Button>(Resource.Id.startstopButton);
