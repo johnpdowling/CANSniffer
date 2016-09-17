@@ -42,6 +42,15 @@ namespace CANSniffer
 			}
 		}
 
+		public async Task SendStart()
+		{
+			if (port != null)
+			{
+				ushort crc = getCRC(new byte[] { 0x04, 0x04 });
+				await port.WriteAsync(new byte[] { (byte)'V', (byte)'W', 0x04, 0x04, (byte)(crc >> 8), (byte)(crc & 0xFF) }, 0, 6);
+			}
+		}
+
 		public async Task SendNewFilter(byte filterNum, ushort newFilter)
 		{
 			ushort crc = getCRC(new byte[] { 0x07, 0x12, filterNum, (byte)(newFilter >> 8), (byte)(newFilter & 0x00FF) });
@@ -50,20 +59,22 @@ namespace CANSniffer
 
 		public async Task SendNewMask(byte maskNum, ushort newMask)
 		{
-			ushort crc = getCRC(new byte[] { 0x07, 0x12, maskNum, (byte)(newMask >> 8), (byte)(newMask & 0x00FF) });
-			await port.WriteAsync(new byte[] { (byte)'V', (byte)'W', 0x07, 0x12, maskNum, (byte)(newMask >> 8), (byte)(newMask & 0x00FF), (byte)(crc >> 8), (byte)(crc & 0x00FF) }, 0, 9);
+			ushort crc = getCRC(new byte[] { 0x07, 0x11, maskNum, (byte)(newMask >> 8), (byte)(newMask & 0x00FF) });
+			await port.WriteAsync(new byte[] { (byte)'V', (byte)'W', 0x07, 0x11, maskNum, (byte)(newMask >> 8), (byte)(newMask & 0x00FF), (byte)(crc >> 8), (byte)(crc & 0x00FF) }, 0, 9);
 		}
 
 		private async Task SendReadFilter(byte filterNum)
 		{
 			ushort crc = getCRC(new byte[] { 0x05, 0x02, filterNum });
 			await port.WriteAsync(new byte[] { (byte)'V', (byte)'W', 0x05, 0x02, filterNum, (byte)(crc >> 8), (byte)(crc & 0x00FF) }, 0, 7);
+			await Task.Delay(5);
 		}
 
 		private async Task SendReadMask(byte maskNum)
 		{
 			ushort crc = getCRC(new byte[] { 0x05, 0x01, maskNum });
 			await port.WriteAsync(new byte[] { (byte)'V', (byte)'W', 0x05, 0x01, maskNum, (byte)(crc >> 8), (byte)(crc & 0x00FF) }, 0, 7);
+			await Task.Delay(5);
 		}
 
 		public async Task InterpretStream()

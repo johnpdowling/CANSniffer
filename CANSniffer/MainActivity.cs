@@ -14,7 +14,7 @@ using System;
 
 namespace CANSniffer
 {
-	[Activity(Label = "CANSniffer", MainLauncher = true, Icon = "@mipmap/icon")]
+	[Activity(Label = "CANSniffer", MainLauncher = true, Icon = "@mipmap/icon", ScreenOrientation = Android.Content.PM.ScreenOrientation.Portrait)]
 	public class MainActivity : Activity
 	{
 		DateTime sniffStart;
@@ -31,7 +31,7 @@ namespace CANSniffer
 		protected override void OnCreate(Bundle savedInstanceState)
 		{
 			base.OnCreate(savedInstanceState);
-
+			this.Window.SetFlags(WindowManagerFlags.KeepScreenOn, WindowManagerFlags.KeepScreenOn);
 			SetContentView(Resource.Layout.Main);
 
 			ListView myview = FindViewById<ListView>(Resource.Id.pingListView);
@@ -85,6 +85,20 @@ namespace CANSniffer
 
 			button = FindViewById<Button>(Resource.Id.startstopButton);
 			button.Click += StartStopButton_Click;
+
+			button = FindViewById<Button>(Resource.Id.resetMaskFilterButton);
+			button.Click += async delegate 
+			{
+				ushort setting = 0x1000;
+				await interpreter.SendNewMask(0, setting);
+				await interpreter.SendNewMask(1, setting);
+				await interpreter.SendNewFilter(0, setting);
+				await interpreter.SendNewFilter(1, setting);
+				await interpreter.SendNewFilter(2, setting);
+				await interpreter.SendNewFilter(3, setting);
+				await interpreter.SendNewFilter(4, setting);
+				await interpreter.SendNewFilter(5, setting);
+			};
 
 			setEditText(Resource.Id.mask1EditText);
 			setEditText(Resource.Id.mask2EditText);
@@ -429,6 +443,7 @@ namespace CANSniffer
 			}
 			else
 			{
+				interpreter.SendStart();
 				messageData.Clear();
 				RunOnUiThread(() =>
 				{
@@ -439,6 +454,28 @@ namespace CANSniffer
 			}
 			Button button = FindViewById<Button>(Resource.Id.startstopButton);
 			button.Text = GetString(sniffing ? Resource.String.stop : Resource.String.start);
+			button = FindViewById<Button>(Resource.Id.resetMaskFilterButton);
+			button.Enabled = !sniffing;
+			button = FindViewById<Button>(Resource.Id.prefsButton);
+			button.Enabled = !sniffing;
+			EditText edit = FindViewById<EditText>(Resource.Id.mask1EditText);
+			edit.Enabled = !sniffing;
+			edit = FindViewById<EditText>(Resource.Id.mask1EditText);
+			edit.Enabled = !sniffing;
+			edit = FindViewById<EditText>(Resource.Id.mask2EditText);
+			edit.Enabled = !sniffing;
+			edit = FindViewById<EditText>(Resource.Id.filter1EditText);
+			edit.Enabled = !sniffing;
+			edit = FindViewById<EditText>(Resource.Id.filter2EditText);
+			edit.Enabled = !sniffing;
+			edit = FindViewById<EditText>(Resource.Id.filter3EditText);
+			edit.Enabled = !sniffing;
+			edit = FindViewById<EditText>(Resource.Id.filter4EditText);
+			edit.Enabled = !sniffing;
+			edit = FindViewById<EditText>(Resource.Id.filter5EditText);
+			edit.Enabled = !sniffing;
+			edit = FindViewById<EditText>(Resource.Id.filter6EditText);
+			edit.Enabled = !sniffing;
 		}
 
 		public override void OnBackPressed()
